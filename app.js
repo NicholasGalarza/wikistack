@@ -8,7 +8,7 @@ const nunjucks = require('nunjucks');
 const routes = require('./routes');
 const models = require('./models');
 
-const portNum = 3000;
+const PORTNUM = 3000;
 
 // when res.render works with html files, have it use nunjucks to do so
 app.engine('html', nunjucks.render);
@@ -18,16 +18,24 @@ nunjucks.configure('views', {
   noCache: true
 });
 app.use(morgan('dev'));
-app.use(routes);
+
 
 app.use(bodyParser.urlencoded({extended: true})); // HTML form submits.
 app.use(bodyParser.json()); // ajax req.
 app.use(express.static(path.join(__dirname, '/public')));
 
+// Express Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).send(err.message);
+});
+
+app.use(routes);
+
 models.db.sync({force: true })
   .then(() => {
-    app.listen(portNum, () => {
-      console.log(`Listening on port ${portNum}`);
+    app.listen(PORTNUM, () => {
+      console.log(`Listening on port ${PORTNUM}`);
     });
   })
   .catch(console.error);
