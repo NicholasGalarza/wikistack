@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const chalk = require('chalk');
 const path = require('path');
 const nunjucks = require('nunjucks');
-const routes = require('./routes');
+const wikiRouter = require('./routes/wiki');
 const models = require('./models');
 
 const PORTNUM = 3000;
@@ -30,9 +30,15 @@ app.use((err, req, res, next) => {
   res.status(500).send(err.message);
 });
 
-app.use(routes);
+// Set first param of wikiRouter middleware to '/wiki' to natively point to that
+// endpoint.
+app.use('/wiki', wikiRouter);
 
-models.db.sync({force: true })
+app.get('/', (req, res) => {
+  res.render('index');
+});
+
+models.db.sync({force: false })
   .then(() => {
     app.listen(PORTNUM, () => {
       console.log(`Listening on port ${PORTNUM}`);

@@ -4,9 +4,9 @@ const db = new Sequelize('postgres://localhost:5432/wikistack', {
 });
 
 const urlTitleGenerator = title => (
-  title
-    ? title.replace(/\s+/g, '_').replace(/\W/g, '')
-    : Math.random().toString(36).substring(2, 7)
+  title ?
+  title.replace(/\s+/g, '_').replace(/\W/g, '') :
+  Math.random().toString(36).substring(2, 7)
 );
 
 const Page = db.define('page', {
@@ -32,14 +32,13 @@ const Page = db.define('page', {
     defaultValue: Sequelize.NOW
   }
 }, {
-    // This is a virtual, they are never called, only accessed.
-    getterMethods: {
-      route: (title) => `/wiki/${this.getDataValue(title)}`
-    },
-    hooks: {
-      beforeValidate: (page, options) => {
-        page.urlTitle = urlTitleGenerator(page.title);
-      }
+  hooks: {
+    beforeValidate: (page, options) => {
+      page.urlTitle = urlTitleGenerator(page.title);
+    }
+  }, // This is a virtual, never called, only accessed.
+  getterMethods: {
+    route: (title) => `/wiki/${this.urlTitle}`
   }
 });
 
