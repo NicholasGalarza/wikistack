@@ -7,7 +7,8 @@ const path = require('path');
 const nunjucks = require('nunjucks');
 const wikiRouter = require('./routes/wiki');
 const models = require('./models');
-
+const Page = models.Page;
+const User = models.User;
 const PORTNUM = 3000;
 
 // when res.render works with html files, have it use nunjucks to do so
@@ -19,14 +20,14 @@ nunjucks.configure('views', {
 });
 app.use(morgan('dev'));
 
-
-app.use(bodyParser.urlencoded({extended: true})); // HTML form submits.
+app.use(bodyParser.urlencoded({
+  extended: true
+})); // HTML form submits.
 app.use(bodyParser.json()); // ajax req.
 app.use(express.static(path.join(__dirname, '/public')));
 
 // Express Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error(err);
   res.status(500).send(err.message);
 });
 
@@ -38,12 +39,15 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-models.db.sync({force: false })
+User.sync({force: true})
+  .then(() => {
+    return Page.sync({force: true});
+  })
   .then(() => {
     app.listen(PORTNUM, () => {
-      console.log(`Listening on port ${PORTNUM}`);
+      console.log(`Listening on port ${PORTNUM}`)
     });
   })
   .catch(console.error);
 
-  // db.get(urlTitle)
+// db.get(urlTitle)
