@@ -26,6 +26,22 @@ const Page = db.define('page', {
   status: {
     type: Sequelize.ENUM('open', 'closed')
   },
+  tags: {
+    /* Call this every time we attempt to set the tags
+     * property.
+     */
+    type: Sequelize.ARRAY(Sequelize.TEXT),
+    set: function(value) {
+      let arrayOfTags;
+
+      if (typeof value === 'string') {
+        arrayOfTags = value.split('.').map(s => s.trim());
+        this.setDataValue('tags', arrayOfTags);
+      } else {
+        this.setDataValue('tags', value);
+      }
+    }
+  },
   date: {
     type: Sequelize.DATE,
     isDate: true,
@@ -38,7 +54,9 @@ const Page = db.define('page', {
     }
   }, // This is a virtual, never called, only accessed.
   getterMethods: {
-    route: (title) => `/wiki/${this.urlTitle}`
+    route: function() {
+      return '/wiki/' + this.urlTitle;
+    }
   }
 });
 
@@ -55,7 +73,9 @@ const User = db.define('user', {
 });
 
 
-Page.belongsTo(User, {as: 'author'});
+Page.belongsTo(User, {
+  as: 'author'
+});
 
 module.exports = {
   Page,

@@ -25,10 +25,12 @@ router.post('/', (req, res, next) => {
       }
     })
     .spread((user, metadata) => { // [resolves to page found or created, bool(found | not found)]
+      let splitTags = req.body.tags.split(',').map(str => str.trim());
       return Page.create({
           title: req.body.title,
           content: req.body.content,
-          status: req.body.status
+          status: req.body.status,
+          tags: splitTags
         })
         .then((createdPage) => {
           return createdPage.setAuthor(user); // setting authorId of page. Where does .setAuthor() come from?
@@ -38,7 +40,6 @@ router.post('/', (req, res, next) => {
       res.redirect(createdPage.route);
     })
     .catch(next);
-    res.redirect('/');
 });
 
 // '/wiki/add'
@@ -55,6 +56,7 @@ router.get('/:urlTitle', (req, res, next) => {
       }
     })
     .then(page => {
+      console.log(page.tags); 
       if (!page) {
         return next(new Error("Page not found"));
       }

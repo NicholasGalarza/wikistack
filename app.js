@@ -6,7 +6,9 @@ const chalk = require('chalk');
 const path = require('path');
 const nunjucks = require('nunjucks');
 const wikiRouter = require('./routes/wiki');
+const usersRouter = require('./routes/users');
 const models = require('./models');
+
 const Page = models.Page;
 const User = models.User;
 const PORTNUM = 3000;
@@ -26,22 +28,22 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json()); // ajax req.
 app.use(express.static(path.join(__dirname, '/public')));
 
-// Express Error Handling Middleware
-app.use((err, req, res, next) => {
-  res.status(500).send(err.message);
-});
-
 // Set first param of wikiRouter middleware to '/wiki' to natively point to that
 // endpoint.
 app.use('/wiki', wikiRouter);
+app.use('/users', usersRouter); 
 
 app.get('/', (req, res) => {
   res.render('index');
 });
 
-User.sync({force: true})
+User.sync({
+    force: true
+  })
   .then(() => {
-    return Page.sync({force: true});
+    return Page.sync({
+      force: true
+    });
   })
   .then(() => {
     app.listen(PORTNUM, () => {
@@ -50,4 +52,7 @@ User.sync({force: true})
   })
   .catch(console.error);
 
-// db.get(urlTitle)
+// Express Error Handling Middleware
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).send(err.message || "Internal Error");
+});
