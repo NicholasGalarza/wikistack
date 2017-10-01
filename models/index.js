@@ -55,10 +55,36 @@ const Page = db.define('page', {
   }, // This is a virtual, never called, only accessed.
   getterMethods: {
     route: function() {
-      return '/wiki/' + this.urlTitle;
+      return `/wiki/${this.urlTitle}`;
     }
   }
 });
+
+// Class Methods
+Page.findByTag = tag => {
+  return Page.findAll({
+    where: {
+      tags: {
+        $overlap: [tag]
+      }
+    }
+  });
+}
+
+// Instance Methods
+// Find all pages with same id except itself.
+Page.prototype.findSimilar = function() {
+  return Page.findAll({
+    where: {
+      tags: {
+        $overlap: this.tags
+      },
+      id: {
+        $ne: this.id
+      }
+    }
+  });
+}
 
 const User = db.define('user', {
   name: {
@@ -71,7 +97,6 @@ const User = db.define('user', {
     allowNull: false
   }
 });
-
 
 Page.belongsTo(User, {
   as: 'author'

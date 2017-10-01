@@ -47,6 +47,16 @@ router.get('/add', (req, res, next) => {
   res.render('addpage');
 });
 
+router.get('/search/:tag', (req, res, next) => {
+  Page.findByTag(req.params.tags)
+    .then(function(pages) {
+      res.render('index', {
+        pages: pages
+      })
+    })
+    .catch(next);
+})
+
 router.get('/:urlTitle', (req, res, next) => {
   const url = req.params.urlTitle;
 
@@ -56,7 +66,7 @@ router.get('/:urlTitle', (req, res, next) => {
       }
     })
     .then(page => {
-      console.log(page.tags); 
+      console.log(page.tags);
       if (!page) {
         return next(new Error("Page not found"));
       }
@@ -67,8 +77,26 @@ router.get('/:urlTitle', (req, res, next) => {
           res.render('wikipage', {
             page: page
           });
-
         })
+    })
+    .catch(next);
+});
+
+router.get('/:urlTitle/similar', function(req, res, next) {
+  Page.findOne({
+      where: {
+        urlTitle: req.params.urlTitle
+      }
+    })
+    .then(page => (
+      !page ?
+      next(new Error('That page was not found!')) :
+      page.findSimilar()
+    ))
+    .then(similarPages => {
+      res.render('index', {
+        pages: similarPages
+      });
     })
     .catch(next);
 });
