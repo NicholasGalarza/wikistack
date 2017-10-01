@@ -3,7 +3,6 @@
 {% block content %}
   <h3>{{page.title}}<small> (<a href="{{page.route}}/similar">Similar</a>)</small></h3>
   <h4>by <a href="/users/{{page.author.id}}">{{page.author.name}}</a></h4>
-  <div>PLACEHOLDER TAG LIST</div>
   <ul>
     {% for tag in page.tags %}
       <li>
@@ -12,8 +11,10 @@
     {% endfor %}
   </ul>
   <hr/>
-  <div>PLACEHOLDER AUTHOR NAME WITH LINK TO AUTHOR PAGE</div>
-  <div class="page-body">{{page.content}}</div>
+  <!-- interface with getter to safely render markdown -->
+  <div class="page-body">
+    {% autoescape false %}{{ page.renderedContent }}{% endautoescape %}
+  </div>
   <hr/>
   <a href="{{page.route}}/edit" class="btn btn-primary">edit this page</a>
   <a href="{{page.route}}/delete" class="btn btn-danger">delete this page</a>

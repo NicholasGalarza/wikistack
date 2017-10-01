@@ -88,12 +88,11 @@ router.get('/:urlTitle/similar', function(req, res, next) {
         urlTitle: req.params.urlTitle
       }
     })
-    .then(page => (
-      !page ?
+    .then((page) => ((!page) ?
       next(new Error('That page was not found!')) :
       page.findSimilar()
     ))
-    .then(similarPages => {
+    .then((similarPages) => {
       res.render('index', {
         pages: similarPages
       });

@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const chalk = require('chalk');
 const path = require('path');
 const nunjucks = require('nunjucks');
+const AutoEscapeExtension = require("nunjucks-autoescape")(nunjucks);
 const wikiRouter = require('./routes/wiki');
 const usersRouter = require('./routes/users');
 const models = require('./models');
@@ -17,11 +18,14 @@ const PORTNUM = 3000;
 app.engine('html', nunjucks.render);
 // have res.render work with html files
 app.set('view engine', 'html');
-nunjucks.configure('views', {
+
+const env = nunjucks.configure('views', {
   noCache: true
 });
-app.use(morgan('dev'));
+// Allows user to include markdown text without insecure injections. 
+env.addExtension('AutoEscapeExtension', new AutoEscapeExtension(env));
 
+app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({
   extended: true
 })); // HTML form submits.
@@ -31,7 +35,7 @@ app.use(express.static(path.join(__dirname, '/public')));
 // Set first param of wikiRouter middleware to '/wiki' to natively point to that
 // endpoint.
 app.use('/wiki', wikiRouter);
-app.use('/users', usersRouter); 
+app.use('/users', usersRouter);
 
 app.get('/', (req, res) => {
   res.render('index');

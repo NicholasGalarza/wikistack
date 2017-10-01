@@ -2,8 +2,9 @@ const Sequelize = require('sequelize');
 const db = new Sequelize('postgres://localhost:5432/wikistack', {
   logging: false
 });
+const marked = require('marked');
 
-const urlTitleGenerator = title => (
+const urlTitleGenerator = (title) => (
   title ?
   title.replace(/\s+/g, '_').replace(/\W/g, '') :
   Math.random().toString(36).substring(2, 7)
@@ -56,6 +57,9 @@ const Page = db.define('page', {
   getterMethods: {
     route: function() {
       return `/wiki/${this.urlTitle}`;
+    }, 
+    renderedContent: function() {
+      return marked(this.content);
     }
   }
 });
@@ -73,7 +77,7 @@ Page.findByTag = tag => {
 
 // Instance Methods
 // Find all pages with same id except itself.
-Page.prototype.findSimilar = function() {
+Page.prototype.findSimilar = () => {
   return Page.findAll({
     where: {
       tags: {
